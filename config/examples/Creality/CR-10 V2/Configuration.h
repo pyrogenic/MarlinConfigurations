@@ -25,8 +25,16 @@
  * Creality CD-10 V2 options
  */
 
+#define AUTO_BED_LEVELING_UBL
+#define PREHEAT_BEFORE_PROBING
+
 // Is the BLTouch option installed?
-#define CR10V2_BLTOUCH
+//#define CR10V2_BLTOUCH
+#if ENABLED(CR10V2_BLTOUCH)
+  #define USE_PROBE_FOR_Z_HOMING
+  #define BABYSTEPPING
+  #define G29_RETRY_AND_RECOVER
+#endif
 
 /**
  * Configuration.h
@@ -1052,9 +1060,6 @@
 
 // Force the use of the probe for Z-axis homing
 //#define USE_PROBE_FOR_Z_HOMING
-#if ENABLED(CR10V2_BLTOUCH)
-  #define USE_PROBE_FOR_Z_HOMING
-#endif
 
 /**
  * Z_MIN_PROBE_PIN
@@ -1586,18 +1591,25 @@
  */
 //#define AUTO_BED_LEVELING_3POINT
 //#define AUTO_BED_LEVELING_LINEAR
-#if ENABLED(CR10V2_BLTOUCH)
-  #define AUTO_BED_LEVELING_BILINEAR
-#endif
+//#define AUTO_BED_LEVELING_BILINEAR
 //#define AUTO_BED_LEVELING_UBL
 //#define MESH_BED_LEVELING
+
+#if ANY(AUTO_BED_LEVELING_3POINT, AUTO_BED_LEVELING_LINEAR, AUTO_BED_LEVELING_BILINEAR, AUTO_BED_LEVELING_UBL, MESH_BED_LEVELING) 
+  #define ANY_BED_LEVELING
+#else
+  #if ENABLED(CR10V2_BLTOUCH)
+    #define AUTO_BED_LEVELING_BILINEAR
+    #define ANY_BED_LEVELING
+  #endif
+#endif
 
 /**
  * Normally G28 leaves leveling disabled on completion. Enable one of
  * these options to restore the prior leveling state or to always enable
  * leveling immediately after G28.
  */
-#if ENABLED(CR10V2_BLTOUCH)
+#if ANY_BED_LEVELING
   #define RESTORE_LEVELING_AFTER_G28
 #endif
 //#define ENABLE_LEVELING_AFTER_G28
@@ -1721,11 +1733,11 @@
  * Add a bed leveling sub-menu for ABL or MBL.
  * Include a guided procedure if manual probing is enabled.
  */
-#if ENABLED(CR10V2_BLTOUCH)
+#if ANY_BED_LEVELING
   #define LCD_BED_LEVELING
 #endif
 
-#if ENABLED(LCD_BED_LEVELING)
+#if ANY_BED_LEVELING
   #define MESH_EDIT_Z_STEP  0.025 // (mm) Step size while manually probing Z axis.
   #define LCD_PROBE_Z_RANGE 4     // (mm) Z Range centered on Z_MIN_POS for LCD Z adjustment
   #define MESH_EDIT_MENU        // Add a menu to edit mesh points
